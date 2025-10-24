@@ -1,6 +1,6 @@
 @props([
     'breadcrumbs' => [],
-    'title' => config('app.name', 'Laravel'),
+    'title' => config('app.name', 'Auto Gestion ComfaCho'),
 ])
 
 <!DOCTYPE html>
