@@ -12,7 +12,7 @@ title="empleados"
 
 <x-slot name="action">
     <x-wire-button  blue href="{{ route('admin.empleados.create') }}" >
-        <i class="fa-solid fa-plus"></i> Nuevo Cliente
+        <i class="fa-solid fa-plus"></i> Nuevo Empleado
     </x-wire-button>
 </x-slot>
 

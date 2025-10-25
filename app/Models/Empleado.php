@@ -11,5 +11,14 @@ class Empleado extends Model
         'nombre',
         'area',
         'fecha_de_ingreso',
+        'email',
+        'password',
+
     ];
+//Rerelación muchos a muchos con roles
+
+    public function roles()
+{
+    return $this->belongsToMany(Role::class);
+}
 }

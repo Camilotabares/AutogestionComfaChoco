@@ -12,7 +12,7 @@
         [
             'name' => 'Roles',
             'icon' => 'fa-solid fa-user-tie',
-            'href' => '#',
+            'href' => route('admin.roles.index'),
             'active' => request()->routeIs('admin.dashboard'),
         ],
         [
@@ -34,8 +34,8 @@
                 ],
                 [
                     'name' => 'Permisos',
-                    'href' => '#',
-                    'active' => false,
+                    'href' => route('admin.permisos.index'),
+                    'active' => request()->routeIs('admin.permisos.*'),
                 ],
                 [
                     'name' => 'Licencias',

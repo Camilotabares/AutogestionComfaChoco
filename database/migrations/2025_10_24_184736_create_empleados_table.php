@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('cedula')->unique();
             $table->string('nombre');
-            $table->string('area');
+            $table->enum('area',['administrativa','operativa','comercial','talentoHumano']);
             $table->date('fecha_de_ingreso');
-    
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
             $table->timestamps();
         });
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Empleado;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
 class EmpleadosController extends Controller
 {
@@ -21,7 +22,8 @@ class EmpleadosController extends Controller
      */
     public function create()
     {
-        return view('admin.empleados.create');
+        $roles = Role::all();
+        return view('admin.empleados.create', compact('roles'));
     }
 
     /**
@@ -29,19 +31,20 @@ class EmpleadosController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $data = $request->validate([
             'cedula' => 'required|unique:empleados,cedula',
             'nombre' => 'required|string|max:255',
-            'area' => 'required|string|max:255',
+            'email' => 'required|string|email||max:255|unique:empleados',
+            'password' => 'required|string|min:8|confirmed',
+            'area' => 'required|in:administrativa,Operativa,Comercial,TalentoHumano',
+            'role_id' => 'required|exists:roles,id',
             'fecha_de_ingreso' => 'required|date_format:Y-m-d',
         ]);
 
-        Empleado::create([
-            'cedula' => $request->cedula,
-            'nombre' => $request->nombre,
-            'area' => $request->area,
-            'fecha_de_ingreso' => $request->fecha_de_ingreso,
-        ]);
+
+        $empleado = Empleado::create($data);
+
+        $empleado->roles()->attach($data['role_id']);
 
 
         session()->flash('swal',[

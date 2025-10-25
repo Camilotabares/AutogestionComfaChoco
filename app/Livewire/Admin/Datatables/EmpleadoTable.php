@@ -32,6 +32,13 @@ class EmpleadoTable extends DataTableComponent
             Column::make("Fecha de ingreso", "fecha_de_ingreso")
                 ->sortable()
                 ->searchable(),
+            Column::make("Email", "email")
+                ->sortable()
+                ->searchable(),
+            Column::make("Rol", "roles")
+                ->label(function ( $row) {
+                    return $row->roles->first()?->name??'sin rol ';
+                }),
             Column::make("Acciones")
                     ->label(function($row){
                     return view('admin.empleados.actions',[
