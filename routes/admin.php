@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\EmpleadosController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\VacationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\PermisosController;
 
@@ -21,3 +22,4 @@ Route::resource('empleados',EmpleadosController::class);
 // ruta para permisos
 
 Route::resource('permisos',PermisosController::class);
+Route::resource('vacaciones', VacationController::class);

@@ -25,12 +25,12 @@
             'name' => 'Solicitudes',
             'icon' => 'fa-solid fa-box-tissue',
             'href' => route('admin.dashboard'),
-            'active' => request()->routeIs('admin.dashboard'),
+            'active' => request()->routeIs('admin.vacaciones.*'),
             'submenu' => [
                 [
                     'name' => 'Vacaciones',
-                    'href' => '#',
-                    'active' => false,
+                    'href' => route('admin.vacaciones.index'),
+                    'active' => request()->routeIs('admin.vacaciones.index'),
                 ],
                 [
                     'name' => 'Permisos',

@@ -2,23 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Empleado extends Model
 {
+    use HasFactory;
+
+    // Temporal: apuntar a la tabla temporal mientras se hacen cambios en el esquema
+    // Cambiar de nuevo a 'empleados' cuando se consolide el cambio.
+    protected $table = 'empleados_temp';
+
     protected $fillable = [
+        'user_id',
         'cedula',
         'nombre',
-        'area',
-        'fecha_de_ingreso',
         'email',
         'password',
-
+        'area',
+        'rol',
+        'fecha_de_ingreso',
     ];
-//Rerelación muchos a muchos con roles
 
-    public function roles()
-{
-    return $this->belongsToMany(Role::class);
-}
+    protected $casts = [
+        'fecha_de_ingreso' => 'date',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
