@@ -1,15 +1,23 @@
 <div class="flex items-center space-x-2">
-    <x-wire-button href="{{ route('admin.empleados.edit',$empleado)}}" blue xs>
-        <i class="fa-solid fa-pen-to-square"></i>
-    </x-wire-button>
-
-
-    <form action="{{ route('admin.empleados.destroy',$empleado) }}" method="POST" >
-        @csrf
-        @method('DELETE')
-        <x-wire-button type="submit" red xs>
-            <i class="fa-solid fa-trash"></i>
+    @can('empleados.edit')
+        <x-wire-button href="{{ route('admin.empleados.edit',$empleado)}}" blue xs>
+            <i class="fa-solid fa-pen-to-square"></i>
         </x-wire-button>
-    </form>
+    @endcan
 
+    @can('empleados.delete')
+        <form action="{{ route('admin.empleados.destroy',$empleado) }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <x-wire-button type="submit" red xs>
+                <i class="fa-solid fa-trash"></i>
+            </x-wire-button>
+        </form>
+    @endcan
+
+    @cannot('empleados.edit')
+        @cannot('empleados.delete')
+            <span class="text-gray-400 text-xs">Solo lectura</span>
+        @endcannot
+    @endcannot
 </div>

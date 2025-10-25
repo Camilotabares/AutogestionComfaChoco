@@ -14,7 +14,21 @@ class PermisosController extends Controller
      */
     public function index()
     {
-        return view('admin.permisos.index');
+        $user = auth()->user();
+        
+        // Si es RRHH o Supervisor, mostrar todas las solicitudes pendientes
+        if ($user->hasAnyRole(['rrhh', 'supervisor', 'admin'])) {
+            $pendientes = Permisos::where('estado', 'pendiente')
+                ->with('empleado')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            // Empleado: solo ver sus propias solicitudes
+            $empleado = $user->empleado;
+            $pendientes = $empleado ? Permisos::where('empleado_id', $empleado->id)->get() : collect();
+        }
+        
+        return view('admin.permisos.index', compact('pendientes'));
     }
 
     /**
@@ -100,5 +114,87 @@ class PermisosController extends Controller
     public function destroy(Permisos $permiso)
     {
         //
+    }
+
+    public function approve(string $id)
+    {
+        $permiso = Permisos::findOrFail($id);
+        $user = auth()->user();
+
+        // Solo se pueden aprobar permisos pendientes
+        if ($permiso->estado !== 'pendiente') {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Ya procesado',
+                'text' => 'Este permiso ya fue procesado.',
+            ]);
+            return redirect()->route('admin.permisos.index');
+        }
+
+        // Calcular días del permiso
+        $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
+            ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_final)) + 1;
+
+        // Si es supervisor y el permiso es mayor a 2 días, no puede aprobar
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $dias > 2) {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Sin autorización',
+                'text' => 'Los permisos mayores a 2 días deben ser aprobados por Recursos Humanos.',
+            ]);
+            return redirect()->route('admin.solicitudes-pendientes.index');
+        }
+
+        // Actualizar estado
+        $permiso->update(['estado' => 'aprobado']);
+
+        session()->flash('swal', [
+            'icon' => 'success',
+            'title' => 'Aprobado',
+            'text' => 'El permiso ha sido aprobado correctamente.',
+        ]);
+
+        return redirect()->route('admin.solicitudes-pendientes.index');
+    }
+
+    public function reject(string $id)
+    {
+        $permiso = Permisos::findOrFail($id);
+        $user = auth()->user();
+
+        // Solo se pueden rechazar permisos pendientes
+        if ($permiso->estado !== 'pendiente') {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Ya procesado',
+                'text' => 'Este permiso ya fue procesado.',
+            ]);
+            return redirect()->route('admin.solicitudes-pendientes.index');
+        }
+
+        // Calcular días del permiso
+        $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
+            ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_final)) + 1;
+
+        // Si es supervisor y el permiso es mayor a 2 días, no puede rechazar
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $dias > 2) {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Sin autorización',
+                'text' => 'Los permisos mayores a 2 días deben ser procesados por Recursos Humanos.',
+            ]);
+            return redirect()->route('admin.solicitudes-pendientes.index');
+        }
+
+        // Actualizar estado
+        $permiso->update(['estado' => 'rechazado']);
+
+        session()->flash('swal', [
+            'icon' => 'success',
+            'title' => 'Rechazado',
+            'text' => 'El permiso ha sido rechazado.',
+        ]);
+
+        return redirect()->route('admin.solicitudes-pendientes.index');
     }
 }

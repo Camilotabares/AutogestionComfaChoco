@@ -38,6 +38,13 @@ class VacationController extends Controller
         $days_available = 0;
         $can_request = false;
 
+        // Si es RRHH, Supervisor o Admin, mostrar TODAS las solicitudes pendientes
+        if ($usuario->hasAnyRole(['rrhh', 'supervisor', 'admin'])) {
+            $pendientes = SolicitudVacacion::where('estado', 'pendiente')
+                ->orderByDesc('created_at')
+                ->get();
+        }
+
         if ($empleado) {
             $baseQuery = SolicitudVacacion::query()
                 ->where('cedula', $empleado->cedula);
@@ -58,7 +65,10 @@ class VacationController extends Controller
                 ->orderByDesc('created_at')
                 ->get();
 
-            $pendientes = $solicitudes->where('estado', 'pendiente')->values();
+            // Si es empleado, solo sus propias pendientes
+            if (!$usuario->hasAnyRole(['rrhh', 'supervisor', 'admin'])) {
+                $pendientes = $solicitudes->where('estado', 'pendiente')->values();
+            }
 
             // --- Vacation eligibility and balances ---
             if ($empleado->fecha_de_ingreso) {
@@ -270,12 +280,23 @@ class VacationController extends Controller
     public function approve(string $id)
     {
         $solicitud = SolicitudVacacion::findOrFail($id);
+        $user = auth()->user();
 
         // Solo se pueden aprobar solicitudes pendientes
         if ($solicitud->estado !== 'pendiente') {
             return redirect()
                 ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
                 ->with('status', __('Esta solicitud ya fue procesada.'));
+        }
+
+        // Si es supervisor y la solicitud es mayor a 2 días, no puede aprobar
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $solicitud->dias_habiles > 2) {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Sin autorización',
+                'text' => 'Las solicitudes mayores a 2 días deben ser aprobadas por Recursos Humanos.',
+            ]);
+            return redirect()->route('admin.solicitudes-pendientes.index');
         }
 
         // Buscar el empleado por cédula
@@ -303,26 +324,37 @@ class VacationController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+            ->route('admin.solicitudes-pendientes.index')
             ->with('status', __('La solicitud fue aprobada correctamente.'));
     }
 
     public function reject(string $id)
     {
         $solicitud = SolicitudVacacion::findOrFail($id);
+        $user = auth()->user();
 
         // Solo se pueden rechazar solicitudes pendientes
         if ($solicitud->estado !== 'pendiente') {
             return redirect()
-                ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+                ->route('admin.solicitudes-pendientes.index')
                 ->with('status', __('Esta solicitud ya fue procesada.'));
+        }
+
+        // Si es supervisor y la solicitud es mayor a 2 días, no puede rechazar
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $solicitud->dias_habiles > 2) {
+            session()->flash('swal', [
+                'icon' => 'warning',
+                'title' => 'Sin autorización',
+                'text' => 'Las solicitudes mayores a 2 días deben ser procesadas por Recursos Humanos.',
+            ]);
+            return redirect()->route('admin.solicitudes-pendientes.index');
         }
 
         // Actualizar estado de la solicitud a rechazado
         $solicitud->update(['estado' => 'rechazado']);
 
         return redirect()
-            ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+            ->route('admin.solicitudes-pendientes.index')
             ->with('status', __('La solicitud fue rechazada.'));
     }
 }

@@ -9,34 +9,54 @@
         [
             'header'=>'Gestion'
         ],
-        [
+    ];
+
+    // Solo mostrar Roles si tiene permiso
+    if (auth()->user()->can('roles.index')) {
+        $links[] = [
             'name' => 'Roles',
             'icon' => 'fa-solid fa-user-tie',
             'href' => route('admin.roles.index'),
-            'active' => request()->routeIs('admin.dashboard'),
-        ],
-        [
+            'active' => request()->routeIs('admin.roles.*'),
+        ];
+    }
+
+    // Solo mostrar Empleados si tiene permiso
+    if (auth()->user()->can('empleados.index')) {
+        $links[] = [
             'name' => 'Empleados',
             'icon' => 'fa-solid fa-user-tie',
             'href' => route('admin.empleados.index'),
-            'active' => request()->routeIs('admin.dashboard'),
-        ],
-        [
-            'name' => 'Solicitudes',
-            'icon' => 'fa-solid fa-box-tissue',
-            'href' => route('admin.dashboard'),
-            'active' => request()->routeIs('admin.vacaciones.*'),
-            'submenu' => [
-                [
-                    'name' => 'Vacaciones',
-                    'href' => route('admin.vacaciones.index'),
-                    'active' => request()->routeIs('admin.vacaciones.index'),
-                ],
-                [
-                    'name' => 'Permisos',
-                    'href' => route('admin.permisos.index'),
-                    'active' => request()->routeIs('admin.permisos.*'),
-                ],
+            'active' => request()->routeIs('admin.empleados.*'),
+        ];
+    }
+
+    // Solicitudes Pendientes - solo para RRHH, Supervisor, Admin
+    if (auth()->user()->hasAnyRole(['rrhh', 'supervisor', 'admin'])) {
+        $links[] = [
+            'name' => 'Solicitudes Pendientes',
+            'icon' => 'fa-solid fa-clock',
+            'href' => route('admin.solicitudes-pendientes.index'),
+            'active' => request()->routeIs('admin.solicitudes-pendientes.*'),
+        ];
+    }
+
+    // Solicitudes - todos pueden ver
+    $links[] = [
+        'name' => 'Solicitudes',
+        'icon' => 'fa-solid fa-box-tissue',
+        'href' => route('admin.dashboard'),
+        'active' => request()->routeIs('admin.vacaciones.*'),
+        'submenu' => [
+            [
+                'name' => 'Vacaciones',
+                'href' => route('admin.vacaciones.index'),
+                'active' => request()->routeIs('admin.vacaciones.index'),
+            ],
+            [
+                'name' => 'Permisos',
+                'href' => route('admin.permisos.index'),
+                'active' => request()->routeIs('admin.permisos.*'),
             ],
         ],
     ];
