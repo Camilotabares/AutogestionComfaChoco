@@ -82,12 +82,18 @@ class VacationController extends Controller
                 // last anniversary (most recent completed anniversary)
                 $last_anniversary = $fechaIngreso->copy()->addYears($years_completed);
 
-                // minimum allowed start date is one month after the last anniversary
-                $min_start_date = $last_anniversary->copy()->addMonth();
-
                 // accrued days: 15 per year, capped at 30
                 $accrual_years = min($years_completed, 2);
                 $accrued_days = (int) ($accrual_years * 15);
+
+                // minimum allowed start date is one month after the last anniversary
+                // BUT if the employee already has the maximum accrued days (30),
+                // we do not apply the anniversary-based restriction.
+                if ($accrued_days >= 30) {
+                    $min_start_date = null;
+                } else {
+                    $min_start_date = $last_anniversary->copy()->addMonth();
+                }
 
                 // days taken: sum of approved solicitudes (these are already taken/confirmed)
                 $days_taken = (int) SolicitudVacacion::where('cedula', $empleado->cedula)
@@ -196,7 +202,13 @@ class VacationController extends Controller
         $min_start_date = $last_anniversary->copy()->addMonth();
 
         $accrued_days = min($years_completed, 2) * 15;
-        
+        // If the employee already has the maximum accrual (30 days),
+        // we should not enforce the anniversary + 1 month minimum start date.
+        if ($accrued_days >= 30) {
+            $min_start_date = null;
+        } else {
+            $min_start_date = $fechaIngreso->copy()->addYears($years_completed)->addMonth();
+        }
         // Days taken: approved solicitudes
         $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
             ->where('estado', 'aprobado')
@@ -222,9 +234,9 @@ class VacationController extends Controller
                 ->with('status', __('No tiene días disponibles para solicitar en este momento.'));
         }
 
-        // Validate start date minimum
+        // Validate start date minimum (only if a minimum start date is set)
         $fechaInicio = Carbon::parse($validated['fecha_inicio'])->startOfDay();
-        if ($fechaInicio->lt($min_start_date)) {
+        if (isset($min_start_date) && $min_start_date && $fechaInicio->lt($min_start_date)) {
             return redirect()
                 ->route('admin.vacaciones.index', ['tab' => 'solicitar'])
                 ->with('status', __('La fecha de inicio debe ser como mínimo :date', ['date' => $min_start_date->format('Y-m-d')]));

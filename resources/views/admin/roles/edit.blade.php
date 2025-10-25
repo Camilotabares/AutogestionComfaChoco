@@ -36,12 +36,12 @@
                         @foreach ($permissions as $permission)
                             <li class="mb-2">
                                 <label class="inline-flex items-center">
-                                    <x-checkbox
-                                        name="permissions[]"
-                                        value="{{ $permission->id }}"
-                                        class="form-checkbox h-5 w-5 text-primary-600"
-                                        :checked="in_array($permission->id, old('permissions', $role->permissions->pluck('id')->toArray()))"
-                                    >
+                    <x-checkbox
+                        name="permissions[]"
+                        value="{{ $permission->id }}"
+                        class="form-checkbox h-5 w-5 text-primary-600"
+                        :checked="in_array($permission->id, old('permissions', $role->permissions->pluck('id')->toArray()))"
+                        />
                                     <span class="ml-2 text-gray-700">{{ $permission->name }}</span>
                                 </label>
                             </li>
@@ -55,4 +55,5 @@
                     </x-wire-button>
                 </div>
             </form>
+        </x-wire-card>
 </x-admin-layout>
