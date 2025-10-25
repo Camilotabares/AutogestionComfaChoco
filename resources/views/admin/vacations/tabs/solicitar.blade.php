@@ -75,69 +75,60 @@
                     {{ __('Información Solicitud') }}
                 </header>
 
-                <div class="grid gap-4">
-                    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <x-wire-input 
+                <div class="space-y-4">
+                    <!-- Fecha Inicio -->
+                    <div>
+                        <label for="fecha_inicio" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ __('Desde') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
                             id="fecha_inicio"
-                            label="{{ __('Desde') }}" 
-                            type="date" 
                             name="fecha_inicio" 
-                            :value="old('fecha_inicio')" 
-                            @if(isset($min_start_date)) min="{{ $min_start_date->format('Y-m-d') }}" @endif 
-                            onchange="calculateBusinessDays()"
-                            required 
-                        />
-                        <x-wire-input 
-                            id="fecha_fin"
-                            label="{{ __('Hasta') }}" 
-                            type="date" 
-                            name="fecha_fin" 
-                            :value="old('fecha_fin')" 
-                            onchange="calculateBusinessDays()"
-                            required 
-                        />
-                        <x-wire-input 
-                            id="dias_habiles"
-                            label="{{ __('No. Días Hábiles') }}" 
-                            type="number" 
-                            min="0" 
-                            max="{{ $days_available ?? 0 }}"
-                            name="dias_habiles" 
-                            :value="old('dias_habiles')" 
-                            readonly
-                            required 
+                            value="{{ old('fecha_inicio') }}"
+                            @if(isset($min_start_date)) min="{{ $min_start_date->format('Y-m-d') }}" @endif
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                            required
                         />
                     </div>
 
-                    <script>
-                        function calculateBusinessDays() {
-                            const startDate = document.getElementById('fecha_inicio').value;
-                            const endDate = document.getElementById('fecha_fin').value;
-                            const availableDays = {{ $days_available ?? 0 }};
+                    <!-- Fecha Fin -->
+                    <div>
+                        <label for="fecha_fin" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ __('Hasta') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            id="fecha_fin"
+                            name="fecha_fin" 
+                            value="{{ old('fecha_fin') }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                            required
+                        />
+                    </div>
 
-                            if (startDate && endDate) {
-                                const start = new Date(startDate);
-                                const end = new Date(endDate);
-                                let businessDays = 0;
-                                const current = new Date(start);
+                    <!-- Días Hábiles -->
+                    <div>
+                        <label for="dias_habiles" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ __('No. Días Hábiles') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="dias_habiles"
+                            name="dias_habiles" 
+                            value="{{ old('dias_habiles') }}"
+                            min="1"
+                            max="{{ $days_available ?? 0 }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                            required
+                        />
+                    </div>
 
-                                while (current <= end) {
-                                    const dayOfWeek = current.getDay();
-                                    // Count only Monday (1) through Friday (5)
-                                    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-                                        businessDays++;
-                                    }
-                                    current.setDate(current.getDate() + 1);
-                                }
-
-                                // Limit to available days
-                                businessDays = Math.min(businessDays, availableDays);
-                                document.getElementById('dias_habiles').value = businessDays;
-                            }
-                        }
-                    </script>
-
-                    {{-- Autorizador removed --}}
+                    <div class="text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded p-3">
+                        <i class="fa-solid fa-info-circle text-blue-600"></i>
+                        <strong>Nota:</strong> Los días hábiles se calculan automáticamente excluyendo únicamente domingos (se trabaja de lunes a sábado). 
+                        Tiene disponibles <strong class="text-blue-700">{{ $days_available ?? 0 }}</strong> días.
+                    </div>
 
                     <x-wire-textarea label="{{ __('Observaciones') }}" placeholder="{{ __('Agregar observaciones') }}" name="observaciones">{{ old('observaciones') }}</x-wire-textarea>
 
@@ -169,4 +160,55 @@
             </section>
         </form>
     </x-wire-card>
+
+    @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fechaInicio = document.getElementById('fecha_inicio');
+            const fechaFin = document.getElementById('fecha_fin');
+            const diasHabiles = document.getElementById('dias_habiles');
+            const availableDays = {{ $days_available ?? 0 }};
+
+            function calculateBusinessDays() {
+                const startDate = fechaInicio.value;
+                const endDate = fechaFin.value;
+
+                if (startDate && endDate) {
+                    const start = new Date(startDate + 'T00:00:00');
+                    const end = new Date(endDate + 'T00:00:00');
+                    
+                    if (end < start) {
+                        diasHabiles.value = 0;
+                        return;
+                    }
+
+                    let businessDays = 0;
+                    const current = new Date(start);
+
+                    while (current <= end) {
+                        const dayOfWeek = current.getDay();
+                        // Count all days EXCEPT Sunday (0) - Saturday is a work day
+                        if (dayOfWeek !== 0) {
+                            businessDays++;
+                        }
+                        current.setDate(current.getDate() + 1);
+                    }
+
+                    // Check if exceeds available days
+                    if (businessDays > availableDays) {
+                        alert('Los días solicitados (' + businessDays + ') exceden los días disponibles (' + availableDays + ')');
+                        diasHabiles.value = availableDays;
+                    } else {
+                        diasHabiles.value = businessDays;
+                    }
+                }
+            }
+
+            if (fechaInicio && fechaFin) {
+                fechaInicio.addEventListener('change', calculateBusinessDays);
+                fechaFin.addEventListener('change', calculateBusinessDays);
+            }
+        });
+    </script>
+    @endpush
 

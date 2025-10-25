@@ -44,8 +44,20 @@ class PermisosController extends Controller
         $validated['soporte'] = $ruta;
         }
 
-        // Asignar estado por defecto
-        $validated['estado'] = 'no_aprobado';
+        // Obtener el empleado del usuario autenticado
+        $empleado = auth()->user()->empleado;
+        if (!$empleado) {
+            session()->flash('swal', [
+                'icon' => 'error',
+                'title' => 'Error',
+                'text' => 'No se encontró un empleado asociado a tu usuario',
+            ]);
+            return redirect()->back();
+        }
+
+        // Asignar estado por defecto y empleado_id
+        $validated['estado'] = 'pendiente';
+        $validated['empleado_id'] = $empleado->id;
 
         // Crear el permiso con los datos validados
         Permisos::create($validated);

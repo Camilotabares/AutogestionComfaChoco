@@ -30,4 +30,14 @@ class Empleado extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function permisos()
+    {
+        return $this->hasMany(Permisos::class);
+    }
+
+    public function solicitudesVacaciones()
+    {
+        return $this->hasMany(SolicitudVacacion::class);
+    }
 }
