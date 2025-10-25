@@ -87,23 +87,23 @@ class VacationController extends Controller
 
                 // accrued days: 15 per year, capped at 30
                 $accrual_years = min($years_completed, 2);
-                $accrued_days = $accrual_years * 15;
+                $accrued_days = (int) ($accrual_years * 15);
 
                 // days taken: sum of approved solicitudes (these are already taken/confirmed)
-                $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
+                $days_taken = (int) SolicitudVacacion::where('cedula', $empleado->cedula)
                     ->where('estado', 'aprobado')
                     ->sum('dias_habiles');
 
                 // days requested but pending: sum of pending solicitudes only
-                $days_pending = SolicitudVacacion::where('cedula', $empleado->cedula)
+                $days_pending = (int) SolicitudVacacion::where('cedula', $empleado->cedula)
                     ->where('estado', 'pendiente')
                     ->sum('dias_habiles');
 
                 // Available days = accrued - taken - pending
-                $days_available = max(0, $accrued_days - $days_taken - $days_pending);
+                $days_available = (int) max(0, $accrued_days - $days_taken - $days_pending);
 
                 // Available days = accrued - taken - pending
-                $days_available = max(0, $accrued_days - $days_taken - $days_pending);
+                $days_available = (int) max(0, $accrued_days - $days_taken - $days_pending);
 
                 // can request if has completed 1 year and has available days
                 if (! $has_one_year) {
@@ -157,19 +157,19 @@ class VacationController extends Controller
         $fechaIngreso = Carbon::parse($empleado->fecha_de_ingreso)->startOfDay();
         $today = Carbon::today();
         $years_completed = $fechaIngreso->diffInYears($today);
-        $accrued_days = min($years_completed, 2) * 15;
+        $accrued_days = (int) (min($years_completed, 2) * 15);
         
         // Days taken: approved solicitudes
-        $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
+        $days_taken = (int) SolicitudVacacion::where('cedula', $empleado->cedula)
             ->where('estado', 'aprobado')
             ->sum('dias_habiles');
         
         // Days pending: pending solicitudes only
-        $days_pending = SolicitudVacacion::where('cedula', $empleado->cedula)
+        $days_pending = (int) SolicitudVacacion::where('cedula', $empleado->cedula)
             ->where('estado', 'pendiente')
             ->sum('dias_habiles');
         
-        $days_available = max(0, $accrued_days - $days_taken - $days_pending);
+        $days_available = (int) max(0, $accrued_days - $days_taken - $days_pending);
 
         $validated = $request->validate([
             'fecha_inicio' => ['required', 'date'],

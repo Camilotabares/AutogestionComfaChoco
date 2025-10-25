@@ -68,6 +68,15 @@ title="Permisos"
             </div>
 
             <div>
+                <label for="dias_habiles" class="block text-sm font-medium text-gray-700">Días Hábiles</label>
+                <input type="number" name="dias_habiles" id="dias_habiles" min="1" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-300 focus:ring focus:ring-primary-200 focus:ring-opacity-50" placeholder="Ingrese los días hábiles">
+                <p class="text-xs text-gray-500 mt-1">Ingrese manualmente los días hábiles del permiso</p>
+                @error('dias_habiles')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
                 <label for="soporte" class="block text-sm font-medium text-gray-700">Soporte del Permiso</label>
                 <input type="file" name="soporte" id="soporte" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                 @error('soporte')

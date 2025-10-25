@@ -35,10 +35,7 @@ class SolicitudesPendientesController extends Controller
             })->values();
 
             $permisosPendientes = $permisosPendientesQuery->get()->filter(function($permiso) {
-                $fechaInicio = \Carbon\Carbon::parse($permiso->fecha_inicio);
-                $fechaFin = \Carbon\Carbon::parse($permiso->fecha_final);
-                $dias = $fechaInicio->diffInDays($fechaFin) + 1;
-                return $dias <= 2;
+                return $permiso->dias_habiles <= 2;
             })->values();
         } else {
             // RRHH y Admin ven solicitudes de > 2 días
@@ -47,10 +44,7 @@ class SolicitudesPendientesController extends Controller
             })->values();
 
             $permisosPendientes = $permisosPendientesQuery->get()->filter(function($permiso) {
-                $fechaInicio = \Carbon\Carbon::parse($permiso->fecha_inicio);
-                $fechaFin = \Carbon\Carbon::parse($permiso->fecha_final);
-                $dias = $fechaInicio->diffInDays($fechaFin) + 1;
-                return $dias > 2;
+                return $permiso->dias_habiles > 2;
             })->values();
         }
 

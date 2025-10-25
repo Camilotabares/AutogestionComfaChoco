@@ -1,52 +1,136 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema de Autogestión - ComfaChoco
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de gestión de vacaciones y permisos para ComfaChoco, desarrollado con Laravel 11.
 
-## About Laravel
+## 🚀 Requisitos
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- PHP >= 8.2
+- Composer
+- MySQL >= 8.0
+- Node.js >= 18.x
+- NPM
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📦 Instalación
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/Camilotabares/AutogestionComfaChoco.git
+cd AutogestionComfaChoco
+```
 
-## Learning Laravel
+2. **Instalar dependencias de PHP**
+```bash
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+3. **Instalar dependencias de Node.js**
+```bash
+npm install
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+4. **Configurar el archivo de entorno**
+```bash
+cp .env.example .env
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+5. **Editar el archivo `.env` con las credenciales de tu base de datos**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nombre_base_datos
+DB_USERNAME=usuario
+DB_PASSWORD=contraseña
+```
 
-## Laravel Sponsors
+6. **Generar la clave de aplicación**
+```bash
+php artisan key:generate
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+7. **Ejecutar las migraciones y seeders**
+```bash
+php artisan migrate --seed
+```
 
-### Premium Partners
+8. **Crear enlace simbólico para el storage**
+```bash
+php artisan storage:link
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+9. **Compilar assets**
+```bash
+npm run build
+```
 
-## Contributing
+10. **Iniciar el servidor de desarrollo**
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🔐 Credenciales de Acceso
+
+Después de ejecutar los seeders (`php artisan migrate --seed`), puedes ingresar con las siguientes credenciales:
+
+### Administrador
+- **Email:** admin@comfachoco.com
+- **Contraseña:** password
+- **Rol:** Administrador del sistema con acceso completo
+
+### Recursos Humanos (RRHH)
+- **Email:** rrhh@comfachoco.com
+- **Contraseña:** password
+- **Rol:** Jefe de RRHH - Aprueba solicitudes mayores a 2 días
+
+### Supervisor
+- **Email:** supervisor@comfachoco.com
+- **Contraseña:** password
+- **Rol:** Supervisor de área - Aprueba solicitudes de 1-2 días
+
+### Empleado
+- **Email:** empleado@comfachoco.com
+- **Contraseña:** password
+- **Rol:** Empleado regular - Puede solicitar vacaciones y permisos
+
+## 📋 Funcionalidades
+
+- ✅ Gestión de solicitudes de vacaciones
+- ✅ Gestión de permisos y ausentismos
+- ✅ Sistema de aprobaciones por roles (Supervisor/RRHH)
+- ✅ Consulta de solicitudes pendientes, aprobadas y rechazadas
+- ✅ Cálculo manual de días hábiles
+- ✅ Notificaciones con SweetAlert
+- ✅ Sistema de permisos con Spatie Laravel-Permission
+
+## 🛠️ Tecnologías Utilizadas
+
+- **Backend:** Laravel 11
+- **Frontend:** Blade Templates, Livewire, TailwindCSS
+- **Base de datos:** MySQL
+- **Autenticación:** Laravel Fortify + Jetstream
+- **Permisos:** Spatie Laravel-Permission
+- **Iconos:** Font Awesome
+
+## 📝 Notas Importantes
+
+- Las solicitudes de **1-2 días hábiles** son aprobadas por el **Supervisor**
+- Las solicitudes de **más de 2 días hábiles** son aprobadas por **RRHH**
+- Los días hábiles se ingresan manualmente al crear la solicitud
+- Todos los usuarios deben tener un registro de empleado asociado
+
+## 🤝 Contribuir
+
+Si deseas contribuir al proyecto, por favor:
+1. Haz un fork del repositorio
+2. Crea una rama con tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto es propiedad de ComfaChoco.
+
 
 ## Code of Conduct
 

@@ -63,7 +63,7 @@ title="Solicitudes Pendientes"
                             <td class="px-4 py-3 text-gray-500 whitespace-normal">{{ $solicitud->observaciones ?: '—' }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $solicitud->fecha_inicio?->format('Y-m-d') }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $solicitud->fecha_fin?->format('Y-m-d') }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $solicitud->dias_habiles }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ (int) $solicitud->dias_habiles }}</td>
                             <td class="px-4 py-3">
                                 @php
                                     $badgeClasses = $estadoColors[$solicitud->estado] ?? 'bg-gray-200 text-gray-700';
@@ -138,10 +138,6 @@ title="Solicitudes Pendientes"
                 </thead>
                 <tbody class="divide-y divide-gray-100 bg-white">
                     @forelse ($permisosPendientes as $indice => $permiso)
-                        @php
-                            $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
-                                ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_final)) + 1;
-                        @endphp
                         <tr>
                             <td class="px-4 py-3 text-gray-500">{{ $indice + 1 }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $permiso->empleado->nombre ?? 'N/A' }}</td>
@@ -149,7 +145,7 @@ title="Solicitudes Pendientes"
                             <td class="px-4 py-3 text-gray-700">{{ $permiso->tipo_de_ausentismo ? str_replace('_', ' ', ucfirst($permiso->tipo_de_ausentismo)) : '—' }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ \Carbon\Carbon::parse($permiso->fecha_inicio)->format('Y-m-d') }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ \Carbon\Carbon::parse($permiso->fecha_final)->format('Y-m-d') }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $dias }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ (int) $permiso->dias_habiles }}</td>
                             <td class="px-4 py-3">
                                 @php
                                     $badgeClasses = $estadoColors[$permiso->estado] ?? 'bg-gray-200 text-gray-700';
@@ -161,18 +157,14 @@ title="Solicitudes Pendientes"
                             <td class="px-4 py-3">
                                 @if($permiso->estado === 'pendiente')
                                     <div class="flex gap-2">
-                                        @if(auth()->user()->hasRole('supervisor') && $dias > 3)
-                                            <span class="text-xs text-gray-500">Requiere RRHH</span>
-                                        @else
-                                            @can('permisos.approve')
-                                                <form method="POST" action="{{ route('admin.permisos.approve', $permiso->id) }}" class="inline">
-                                                    @csrf
-                                                    <button type="submit" class="text-green-600 hover:text-green-800" title="Aprobar">
-                                                        <i class="fa-solid fa-check"></i>
-                                                    </button>
-                                                </form>
-                                            @endcan
-                                        @endif
+                                        @can('permisos.approve')
+                                            <form method="POST" action="{{ route('admin.permisos.approve', $permiso->id) }}" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-green-600 hover:text-green-800" title="Aprobar">
+                                                    <i class="fa-solid fa-check"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
                                         
                                         @can('permisos.reject')
                                             <form method="POST" action="{{ route('admin.permisos.reject', $permiso->id) }}" class="inline">

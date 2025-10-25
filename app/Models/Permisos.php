@@ -12,6 +12,7 @@ class Permisos extends Model
         'tipo_de_ausentismo',
         'fecha_inicio',
         'fecha_final',
+        'dias_habiles',
         'soporte',
         'estado',
     ];

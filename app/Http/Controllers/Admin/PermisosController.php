@@ -12,23 +12,37 @@ class PermisosController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
+        $empleado = $user->empleado;
         
-        // Si es RRHH o Supervisor, mostrar todas las solicitudes pendientes
-        if ($user->hasAnyRole(['rrhh', 'supervisor', 'admin'])) {
-            $pendientes = Permisos::where('estado', 'pendiente')
-                ->with('empleado')
-                ->orderBy('created_at', 'desc')
-                ->get();
-        } else {
-            // Empleado: solo ver sus propias solicitudes
-            $empleado = $user->empleado;
-            $pendientes = $empleado ? Permisos::where('empleado_id', $empleado->id)->get() : collect();
+        // Si el usuario no tiene empleado, mostrar colecciones vacías
+        if (!$empleado) {
+            return view('admin.permisos.index', [
+                'pendientes' => collect(),
+                'aprobados' => collect(),
+                'rechazados' => collect(),
+            ]);
         }
         
-        return view('admin.permisos.index', compact('pendientes'));
+        // Cargar solo las solicitudes del empleado actual
+        $pendientes = Permisos::where('empleado_id', $empleado->id)
+            ->where('estado', 'pendiente')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $aprobados = Permisos::where('empleado_id', $empleado->id)
+            ->where('estado', 'aprobado')
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $rechazados = Permisos::where('empleado_id', $empleado->id)
+            ->where('estado', 'rechazado')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('admin.permisos.index', compact('pendientes', 'aprobados', 'rechazados'));
     }
 
     /**
@@ -49,6 +63,7 @@ class PermisosController extends Controller
         'tipo_de_ausentismo' => 'nullable|in:citas_medicas,permiso_personal,liciencia_luto,maternidad,paternidad',
         'fecha_inicio' => 'required|date',
         'fecha_final' => 'required|date|after_or_equal:fecha_inicio',
+        'dias_habiles' => 'required|integer|min:1',
         'soporte' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048',
         ]);
     
@@ -131,12 +146,8 @@ class PermisosController extends Controller
             return redirect()->route('admin.permisos.index');
         }
 
-        // Calcular días del permiso
-        $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
-            ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_final)) + 1;
-
         // Si es supervisor y el permiso es mayor a 2 días, no puede aprobar
-        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $dias > 2) {
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $permiso->dias_habiles > 2) {
             session()->flash('swal', [
                 'icon' => 'warning',
                 'title' => 'Sin autorización',
@@ -172,12 +183,8 @@ class PermisosController extends Controller
             return redirect()->route('admin.solicitudes-pendientes.index');
         }
 
-        // Calcular días del permiso
-        $dias = \Carbon\Carbon::parse($permiso->fecha_inicio)
-            ->diffInDays(\Carbon\Carbon::parse($permiso->fecha_final)) + 1;
-
         // Si es supervisor y el permiso es mayor a 2 días, no puede rechazar
-        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $dias > 2) {
+        if ($user->hasRole('supervisor') && !$user->hasAnyRole(['rrhh', 'admin']) && $permiso->dias_habiles > 2) {
             session()->flash('swal', [
                 'icon' => 'warning',
                 'title' => 'Sin autorización',

@@ -42,7 +42,7 @@
                             <td class="px-4 py-3 text-gray-500 whitespace-normal">{{ $solicitud->observaciones ?: '—' }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $solicitud->fecha_inicio?->format('Y-m-d') }}</td>
                             <td class="px-4 py-3 text-gray-700">{{ $solicitud->fecha_fin?->format('Y-m-d') }}</td>
-                            <td class="px-4 py-3 text-gray-700">{{ $solicitud->dias_habiles }}</td>
+                            <td class="px-4 py-3 text-gray-700">{{ (int) $solicitud->dias_habiles }}</td>
                             <td class="px-4 py-3">
                                 @php
                                     $badgeClasses = $estadoColors[$solicitud->estado] ?? 'bg-gray-200 text-gray-700';

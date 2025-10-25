@@ -61,7 +61,7 @@
                             {{ $vacation->fecha_fin?->format('Y-m-d') }}
                         </td>
                         <td class="px-4 py-3 border border-blue-100 text-center">
-                            {{ $vacation->dias_habiles }}
+                            {{ (int) $vacation->dias_habiles }}
                         </td>
                         <td class="px-4 py-3 border border-blue-100">
                             <span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
