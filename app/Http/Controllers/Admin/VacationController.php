@@ -92,11 +92,8 @@ class VacationController extends Controller
                 // Available days = accrued - taken - pending
                 $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
-                // can request if has completed 1 year, not fully capped without usage, and has available days
+                // can request if has completed 1 year and has available days
                 if (! $has_one_year) {
-                    $can_request = false;
-                } elseif ($accrued_days >= 30 && $days_taken == 0) {
-                    // reached max accrual and no usage -> cannot accumulate/request
                     $can_request = false;
                 } elseif ($days_available <= 0) {
                     $can_request = false;
@@ -199,17 +196,11 @@ class VacationController extends Controller
 
         $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
-        // Block requests if before 1 year or at cap with no usage or no available days
+        // Block requests if before 1 year or no available days
         if (! $has_one_year) {
             return redirect()
                 ->route('admin.vacaciones.index', ['tab' => 'solicitar'])
                 ->with('status', __('Aún no cumple un año en la empresa; no puede solicitar vacaciones.'));
-        }
-
-        if ($accrued_days >= 30 && $days_taken == 0) {
-            return redirect()
-                ->route('admin.vacaciones.index', ['tab' => 'solicitar'])
-                ->with('status', __('Ha alcanzado el tope máximo de acumulación (30 días). Use parte de sus días antes de solicitar más.'));
         }
 
         if ($days_available <= 0) {
