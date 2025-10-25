@@ -5,10 +5,17 @@ namespace App\Livewire\Admin\Datatables;
 use Rappasoft\LaravelLivewireTables\DataTableComponent;
 use Rappasoft\LaravelLivewireTables\Views\Column;
 use Spatie\Permission\Models\Role;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class RoleTable extends DataTableComponent
 {
-    protected $model = Role::class;
+    public function  builder(): Builder
+    {
+        return Role::query()
+        ->withCount('users')
+        ->with('permissions');
+    }
 
     public function configure(): void
     {
@@ -23,10 +30,20 @@ class RoleTable extends DataTableComponent
             Column::make("Nombre", "name")
                 ->sortable()
                 ->searchable(),
-            Column::make("Created at", "created_at")
-                ->sortable(),
-            Column::make("Updated at", "updated_at")
-                ->sortable(),
+            Column::make("N Usuarios")
+                ->label(fn($row) => $row->users_count),
+            Column::make("Permisos")
+                ->label(function($row){
+                return view('admin.roles.permissions',[
+                    'permissions' => $row->permissions
+                ]);
+            }),
+            Column::make("Acciones")
+            ->label(function($row){
+            return view('admin.roles.actions',[
+                'role'=>$row
+            ]);
+        }), 
         ];
     }
 }
