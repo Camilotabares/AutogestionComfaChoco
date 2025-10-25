@@ -92,6 +92,9 @@ class VacationController extends Controller
                 // Available days = accrued - taken - pending
                 $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
+                // Available days = accrued - taken - pending
+                $days_available = max(0, $accrued_days - $days_taken - $days_pending);
+
                 // can request if has completed 1 year and has available days
                 if (! $has_one_year) {
                     $can_request = false;

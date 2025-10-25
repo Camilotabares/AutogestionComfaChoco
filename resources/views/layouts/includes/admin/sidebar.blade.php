@@ -37,11 +37,6 @@
                     'href' => route('admin.permisos.index'),
                     'active' => request()->routeIs('admin.permisos.*'),
                 ],
-                [
-                    'name' => 'Licencias',
-                    'href' => '#',
-                    'active' => false,
-                ],
             ],
         ],
     ];

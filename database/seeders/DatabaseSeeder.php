@@ -21,24 +21,5 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
         ]);
-        
-        $user = User::factory()->create([
-            'name' => 'Daniel',
-            'email' => 'dani@gmail.com',
-            'password' => bcrypt('1298'),
-        ]);
-        
-        $user->assignRole('Admin');
-        
-        // Crear el empleado asociado al usuario
-        Empleado::create([
-            'user_id' => $user->id,
-            'cedula' => '1234567890',
-            'nombre' => 'Daniel',
-            'email' => 'dani@gmail.com',
-            'password' => bcrypt('1298'),
-            'area' => 'administrativa',
-            'fecha_de_ingreso' => now()->subYears(2),
-        ]);
     }
 }
