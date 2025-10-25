@@ -94,7 +94,7 @@
                             </span>
                         </td>
                             <td class="px-4 py-3">
-                                @if($solicitud->estado !== 'aprobado')
+                                @if($solicitud->estado === 'pendiente')
                                     <a href="{{ route('admin.vacaciones.edit', $solicitud) }}" class="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                         {{ __('Editar') }}
@@ -107,7 +107,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                @if($solicitud->estado !== 'aprobado')
+                                @if($solicitud->estado === 'pendiente')
                                     <form method="POST" action="{{ route('admin.vacaciones.destroy', $solicitud) }}" onsubmit="return confirm('{{ __('¿Cancelar esta solicitud?') }}')">
                                         @csrf
                                         @method('DELETE')

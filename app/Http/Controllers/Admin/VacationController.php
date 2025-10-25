@@ -79,14 +79,18 @@ class VacationController extends Controller
                 $accrual_years = min($years_completed, 2);
                 $accrued_days = $accrual_years * 15;
 
-                // days taken: sum of approved vacations for this employee (vacaciones table)
-                if ($empleado->user_id) {
-                    $days_taken = Vacacion::where('usuario_id', $empleado->user_id)
-                        ->where('estado', 'aprobado')
-                        ->sum('dias_habiles');
-                }
+                // days taken: sum of approved solicitudes (these are already taken/confirmed)
+                $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
+                    ->where('estado', 'aprobado')
+                    ->sum('dias_habiles');
 
-                $days_available = max(0, $accrued_days - $days_taken);
+                // days requested but pending: sum of pending solicitudes only
+                $days_pending = SolicitudVacacion::where('cedula', $empleado->cedula)
+                    ->where('estado', 'pendiente')
+                    ->sum('dias_habiles');
+
+                // Available days = accrued - taken - pending
+                $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
                 // can request if has completed 1 year, not fully capped without usage, and has available days
                 if (! $has_one_year) {
@@ -144,13 +148,18 @@ class VacationController extends Controller
         $today = Carbon::today();
         $years_completed = $fechaIngreso->diffInYears($today);
         $accrued_days = min($years_completed, 2) * 15;
-        $days_taken = 0;
-        if ($empleado->user_id) {
-            $days_taken = Vacacion::where('usuario_id', $empleado->user_id)
-                ->where('estado', 'aprobado')
-                ->sum('dias_habiles');
-        }
-        $days_available = max(0, $accrued_days - $days_taken);
+        
+        // Days taken: approved solicitudes
+        $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
+            ->where('estado', 'aprobado')
+            ->sum('dias_habiles');
+        
+        // Days pending: pending solicitudes only
+        $days_pending = SolicitudVacacion::where('cedula', $empleado->cedula)
+            ->where('estado', 'pendiente')
+            ->sum('dias_habiles');
+        
+        $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
         $validated = $request->validate([
             'fecha_inicio' => ['required', 'date'],
@@ -177,14 +186,18 @@ class VacationController extends Controller
         $min_start_date = $last_anniversary->copy()->addMonth();
 
         $accrued_days = min($years_completed, 2) * 15;
-        $days_taken = 0;
-        if ($empleado->user_id) {
-            $days_taken = Vacacion::where('usuario_id', $empleado->user_id)
-                ->where('estado', 'aprobado')
-                ->sum('dias_habiles');
-        }
+        
+        // Days taken: approved solicitudes
+        $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
+            ->where('estado', 'aprobado')
+            ->sum('dias_habiles');
+        
+        // Days pending: pending solicitudes only
+        $days_pending = SolicitudVacacion::where('cedula', $empleado->cedula)
+            ->where('estado', 'pendiente')
+            ->sum('dias_habiles');
 
-        $days_available = max(0, $accrued_days - $days_taken);
+        $days_available = max(0, $accrued_days - $days_taken - $days_pending);
 
         // Block requests if before 1 year or at cap with no usage or no available days
         if (! $has_one_year) {
@@ -258,5 +271,64 @@ class VacationController extends Controller
         return redirect()
             ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
             ->with('status', __('La solicitud fue cancelada.'));
+    }
+
+    public function approve(string $id)
+    {
+        $solicitud = SolicitudVacacion::findOrFail($id);
+
+        // Solo se pueden aprobar solicitudes pendientes
+        if ($solicitud->estado !== 'pendiente') {
+            return redirect()
+                ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+                ->with('status', __('Esta solicitud ya fue procesada.'));
+        }
+
+        // Buscar el empleado por cédula
+        $empleado = Empleado::where('cedula', $solicitud->cedula)->first();
+
+        if (!$empleado || !$empleado->user_id) {
+            return redirect()
+                ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+                ->with('status', __('No se encontró el empleado asociado a esta solicitud.'));
+        }
+
+        // Actualizar estado de la solicitud a aprobado
+        $solicitud->update(['estado' => 'aprobado']);
+
+        // Crear registro en tabla vacaciones para descontar los días
+        Vacacion::create([
+            'usuario_id' => $empleado->user_id,
+            'fecha_inicio' => $solicitud->fecha_inicio,
+            'fecha_fin' => $solicitud->fecha_fin,
+            'dias_habiles' => $solicitud->dias_habiles,
+            'dias_calendario' => Carbon::parse($solicitud->fecha_inicio)
+                ->diffInDays(Carbon::parse($solicitud->fecha_fin)) + 1,
+            'estado' => 'aprobado',
+            'observaciones' => $solicitud->observaciones,
+        ]);
+
+        return redirect()
+            ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+            ->with('status', __('La solicitud fue aprobada correctamente.'));
+    }
+
+    public function reject(string $id)
+    {
+        $solicitud = SolicitudVacacion::findOrFail($id);
+
+        // Solo se pueden rechazar solicitudes pendientes
+        if ($solicitud->estado !== 'pendiente') {
+            return redirect()
+                ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+                ->with('status', __('Esta solicitud ya fue procesada.'));
+        }
+
+        // Actualizar estado de la solicitud a rechazado
+        $solicitud->update(['estado' => 'rechazado']);
+
+        return redirect()
+            ->route('admin.vacaciones.index', ['tab' => 'pendientes'])
+            ->with('status', __('La solicitud fue rechazada.'));
     }
 }
