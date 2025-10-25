@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Empleado;
+use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\Hash;
 
 class EmpleadosController extends Controller
 {
@@ -34,25 +36,42 @@ class EmpleadosController extends Controller
         $data = $request->validate([
             'cedula' => 'required|unique:empleados,cedula',
             'nombre' => 'required|string|max:255',
-            'email' => 'required|string|email||max:255|unique:empleados',
+            'email' => 'required|string|email|max:255|unique:empleados|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'area' => 'required|in:administrativa,Operativa,Comercial,TalentoHumano',
+            'area' => 'required|in:administrativa,operativa,comercial,talentoHumano',
             'role_id' => 'required|exists:roles,id',
-            'fecha_de_ingreso' => 'required|date_format:Y-m-d',
+            'fecha_de_ingreso' => 'required|date',
         ]);
 
+        // Separar role_id de los datos del empleado
+        $roleId = $data['role_id'];
+        unset($data['role_id']);
 
+        // Crear el usuario primero
+        $user = User::create([
+            'name' => $data['nombre'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+        ]);
+
+        // Asignar el rol al usuario
+        $role = Role::findById($roleId);
+        $user->assignRole($role);
+
+        // Crear el empleado vinculado al usuario
+        $data['user_id'] = $user->id;
+        $data['password'] = Hash::make($data['password']);
+        
         $empleado = Empleado::create($data);
 
-        $empleado->roles()->attach($data['role_id']);
-
+        // También asignar el rol al empleado
+        $empleado->assignRole($role);
 
         session()->flash('swal',[
             'icon'=>'success',
             'title'=>'Empleado creado con exito',
             'text'=>'El empleado ha sido creado correctamente'
         ]);
-
 
         return redirect()->route('admin.empleados.index');
     }
