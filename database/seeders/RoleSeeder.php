@@ -14,8 +14,6 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        
-
         $permissions = [
             //Roles
             'show roles',
