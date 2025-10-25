@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Permission\Traits\HasRoles;
 
 class Empleado extends Model
 {
+    use HasRoles;
+
     protected $fillable = [
         'cedula',
         'nombre',
@@ -13,12 +16,7 @@ class Empleado extends Model
         'fecha_de_ingreso',
         'email',
         'password',
-
     ];
-//Rerelación muchos a muchos con roles
 
-    public function roles()
-{
-    return $this->belongsToMany(Role::class);
-}
+    protected $guard_name = 'web';
 }

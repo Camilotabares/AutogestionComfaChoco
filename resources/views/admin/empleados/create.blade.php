@@ -16,6 +16,7 @@ title="Empleados"
 
 <x-wire-card>
     <form action="{{route('admin.empleados.store')}}" method="POST" >
+        <input type="hidden" name="_token" value="{{ csrf_token() }}" />
         @csrf
 
         <div class="space-y-4">
@@ -55,40 +56,40 @@ title="Empleados"
                 placeholder="Confirme la contraseña"
                 value="{{old('password_confirmation')}}"
                 />
-                <x-wire-select
-                label="Area"
-                wire:model="area"
-                placeholder="Seleccione el area"
-                :options="[
-                    ['name' => 'Administrativa','id'=>'administrativa'],
-                    ['name' => 'Operativa', 'id'=>'operativa'],
-                    ['name' => 'Comercial', 'id'=>'comercial'],
-                    ['name' => 'TalentoHumano','id'=>'talentoHumano'],
-                ]"
-                option-label="name"
-                option-value="id"
-                />
+                <x-wire-native-select
+                    label="Area"
+                    name="area"
+                    required
+                >
+                    <option value="">Seleccione un área</option>
+                    <option value="administrativa" @selected(old('area') == 'administrativa')>Administrativa</option>
+                    <option value="operativa" @selected(old('area') == 'operativa')>Operativa</option>
+                    <option value="comercial" @selected(old('area') == 'comercial')>Comercial</option>
+                    <option value="talentoHumano" @selected(old('area') == 'talentoHumano')>Talento Humano</option>
+                </x-wire-native-select>
+
                 <x-wire-native-select
                     label="Rol"
                     name="role_id"
-                    >
-                <option value="">
-                        Seleccione un rol
-                    </option>
+                    required
+                >
+                    <option value="">Seleccione un rol</option>
                     @foreach ( $roles as $role )
                         <option value="{{ $role->id }}"
                             @selected(old('role_id') == $role->id)
-                            >
+                        >
                             {{ $role->name }}
                         </option>
                     @endforeach
                 </x-wire-native-select>
 
                 <x-wire-input
-                label="fecha de ingreso"
-                name="fecha_de_ingreso"
-                placeholder="Ingrese la fecha de ingreso"
-                value="{{old('fecha_ingreso')}}"
+                    label="Fecha de ingreso"
+                    name="fecha_de_ingreso"
+                    type="date"
+                    required
+                    placeholder="YYYY-MM-DD"
+                    value="{{old('fecha_de_ingreso')}}"
                 />
         </div>
 
