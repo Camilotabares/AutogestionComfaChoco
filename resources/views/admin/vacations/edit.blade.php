@@ -1,4 +1,4 @@
-<x-admin-simple-layout title="{{ __('Editar Solicitud de Vacaciones') }}">
+<x-admin-layout title="{{ __('Editar Solicitud de Vacaciones') }}">
     <div class="max-w-4xl mx-auto space-y-6 px-4">
         <x-wire-card>
             <x-slot name="title">
@@ -50,4 +50,4 @@
             </form>
         </x-wire-card>
     </div>
-</x-admin-simple-layout>
+</x-admin-layout>

@@ -18,16 +18,18 @@ title="Permisos"
 @endif
 
     <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center">
             <div>
                 <h1 class="text-2xl font-semibold text-gray-800 mb-2">{{ __('Gestión de Permisos') }}</h1>
                 <p class="text-gray-600">
                     {{ __('Desde aquí puedes registrar solicitudes de ausentismo o licencia y consultar su estado.') }}
                 </p>
             </div>
-            <x-wire-button blue href="{{ route('admin.permisos.create') }}">
-                <i class="fa-solid fa-plus"></i> Registrar Permiso
-            </x-wire-button>
+            @can('permisos.create')
+                <x-wire-button blue href="{{ route('admin.permisos.create') }}">
+                    <i class="fa-solid fa-plus"></i> Registrar Permiso
+                </x-wire-button>
+            @endcan
         </div>
     </div>
 

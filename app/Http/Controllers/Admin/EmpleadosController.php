@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Hash;
 
 class EmpleadosController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:empleados.index')->only(['index', 'show']);
+        $this->middleware('permission:empleados.create')->only(['create', 'store']);
+        $this->middleware('permission:empleados.edit')->only(['edit', 'update']);
+        $this->middleware('permission:empleados.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */

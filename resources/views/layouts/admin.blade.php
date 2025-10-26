@@ -1,6 +1,6 @@
 @props([
     'breadcrumbs' => [],
-    'title' => config('app.name', 'Auto Gestion ComfaCho'),
+    'title' => config('app.name', 'Sinet'),
 ])
 
 <!DOCTYPE html>

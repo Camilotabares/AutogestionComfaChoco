@@ -1,4 +1,4 @@
-<x-admin-simple-layout
+<x-admin-layout
     title="{{ __('Vacaciones') }}"
 >
     @php
@@ -39,4 +39,4 @@
 
         @includeIf('admin.vacations.tabs.' . $currentTab)
     </div>
-</x-admin-simple-layout>
+</x-admin-layout>

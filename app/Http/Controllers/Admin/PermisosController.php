@@ -9,6 +9,14 @@ use Illuminate\Http\Request;
 
 class PermisosController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:permisos.index')->only(['index', 'show']);
+        $this->middleware('permission:permisos.create')->only(['create', 'store']);
+        $this->middleware('permission:permisos.edit')->only(['edit', 'update']);
+        $this->middleware('permission:permisos.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -61,9 +69,24 @@ class PermisosController extends Controller
         $validated= $request->validate([
         'tipo_permiso' => 'required|in:ausentismo,licencia',
         'tipo_de_ausentismo' => 'nullable|in:citas_medicas,permiso_personal,liciencia_luto,maternidad,paternidad',
-        'fecha_inicio' => 'required|date',
+        'fecha_inicio' => 'required|date|after_or_equal:today',
         'fecha_final' => 'required|date|after_or_equal:fecha_inicio',
-        'dias_habiles' => 'required|integer|min:1',
+        'dias_habiles' => [
+            'required',
+            'integer',
+            'min:1',
+            function ($attribute, $value, $fail) use ($request) {
+                if ($request->fecha_inicio && $request->fecha_final) {
+                    $inicio = \Carbon\Carbon::parse($request->fecha_inicio);
+                    $fin = \Carbon\Carbon::parse($request->fecha_final);
+                    $diasTotales = $inicio->diffInDays($fin) + 1;
+                    
+                    if ($value > $diasTotales) {
+                        $fail("Los días hábiles ($value) no pueden ser mayores a la duración total del permiso ($diasTotales días).");
+                    }
+                }
+            }
+        ],
         'soporte' => 'nullable|file|mimes:pdf,jpg,png,doc,docx|max:2048',
         ]);
     

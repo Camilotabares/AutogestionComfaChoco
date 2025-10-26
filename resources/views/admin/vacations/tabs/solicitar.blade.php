@@ -38,7 +38,7 @@
                 <div class="grid gap-4 md:grid-cols-3">
                     <div class="p-3 bg-white border rounded">
                         <div class="text-xs text-gray-500">{{ __('Días acumulados') }}</div>
-                        <div class="text-2xl font-semibold text-blue-700">{{ $accrued_days ?? 0 }}</div>
+                        <div class="text-2xl font-semibold text-blue-700">{{ $accrued_net ?? 0 }}</div>
                     </div>
 
                     <div class="p-3 bg-white border rounded">
@@ -86,7 +86,10 @@
                             id="fecha_inicio"
                             name="fecha_inicio" 
                             value="{{ old('fecha_inicio') }}"
-                            @if(isset($min_start_date)) min="{{ $min_start_date->format('Y-m-d') }}" @endif
+                            min="{{ now()->format('Y-m-d') }}"
+                            @if(isset($min_start_date) && $min_start_date && $min_start_date->gt(now()))
+                                min="{{ $min_start_date->format('Y-m-d') }}"
+                            @endif
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                             required
                         />
@@ -102,6 +105,7 @@
                             id="fecha_fin"
                             name="fecha_fin" 
                             value="{{ old('fecha_fin') }}"
+                            min="{{ now()->format('Y-m-d') }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                             required
                         />

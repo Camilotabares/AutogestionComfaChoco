@@ -10,3 +10,31 @@
 [x-cloak] {
     display: none;
 }
+
+/* Base tweaks for a cleaner UI */
+@layer base {
+    html { @apply scroll-smooth; }
+    body { @apply text-neutral-800; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    select,
+    textarea {
+        @apply rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500;
+    }
+}
+
+/* Reusable components */
+@layer components {
+    .card { @apply bg-white border border-neutral-200 rounded-xl shadow-soft p-4; }
+    .card-header { @apply flex items-center gap-2 text-sm font-semibold text-primary-600 uppercase tracking-wide mb-3; }
+    .muted { @apply text-neutral-500; }
+
+    .btn { @apply inline-flex items-center justify-center gap-2 font-semibold rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-1; }
+    .btn-primary { @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500; }
+    .btn-outline { @apply btn border border-neutral-300 text-neutral-700 hover:bg-neutral-50 focus:ring-neutral-400; }
+    .btn-danger { @apply btn bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500; }
+}

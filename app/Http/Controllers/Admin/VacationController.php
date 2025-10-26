@@ -13,6 +13,15 @@ use App\Models\Vacacion;
 
 class VacationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:vacaciones.index')->only(['index', 'show']);
+        $this->middleware('permission:vacaciones.create')->only(['create', 'store']);
+        $this->middleware('permission:vacaciones.edit')->only(['edit', 'update']);
+        $this->middleware('permission:vacaciones.delete')->only(['destroy']);
+        // approve/reject están protegidos por ruta con permisos específicos
+    }
+
     private const AREAS = [
         'Administrativa',
         'Operativa',
@@ -33,7 +42,8 @@ class VacationController extends Controller
         $has_one_year = false;
         $last_anniversary = null;
         $min_start_date = null;
-        $accrued_days = 0;
+    $accrued_days = 0;
+    $accrued_net = 0;
         $days_taken = 0;
         $days_available = 0;
         $can_request = false;
@@ -86,13 +96,13 @@ class VacationController extends Controller
                 $accrual_years = min($years_completed, 2);
                 $accrued_days = (int) ($accrual_years * 15);
 
-                // minimum allowed start date is one month after the last anniversary
-                // BUT if the employee already has the maximum accrued days (30),
-                // we do not apply the anniversary-based restriction.
-                if ($accrued_days >= 30) {
-                    $min_start_date = null;
-                } else {
+                // Restricción de fecha mínima (aniversario + 1 mes) solo durante el primer año cumplido
+                // Si years_completed == 1 => aplicar restricción
+                // Si years_completed >= 2 => no aplicar restricción (solo rige que sea a futuro)
+                if ($years_completed === 1) {
                     $min_start_date = $last_anniversary->copy()->addMonth();
+                } else {
+                    $min_start_date = null;
                 }
 
                 // days taken: sum of approved solicitudes (these are already taken/confirmed)
@@ -110,6 +120,9 @@ class VacationController extends Controller
 
                 // Available days = accrued - taken - pending
                 $days_available = (int) max(0, $accrued_days - $days_taken - $days_pending);
+
+                // Accrued net = accrued - taken (no cuenta pendientes)
+                $accrued_net = (int) max(0, $accrued_days - $days_taken);
 
                 // can request if has completed 1 year and has available days
                 if (! $has_one_year) {
@@ -141,6 +154,7 @@ class VacationController extends Controller
             'last_anniversary',
             'min_start_date',
             'accrued_days',
+            'accrued_net',
             'days_taken',
             'days_available',
             'can_request'
@@ -178,7 +192,7 @@ class VacationController extends Controller
         $days_available = (int) max(0, $accrued_days - $days_taken - $days_pending);
 
         $validated = $request->validate([
-            'fecha_inicio' => ['required', 'date'],
+            'fecha_inicio' => ['required', 'date', 'after_or_equal:today'],
             'fecha_fin' => ['required', 'date', 'after_or_equal:fecha_inicio'],
             'dias_habiles' => [
                 'required', 
@@ -199,16 +213,14 @@ class VacationController extends Controller
         $years_completed = $fechaIngreso->diffInYears($today);
         $has_one_year = $years_completed >= 1;
         $last_anniversary = $fechaIngreso->copy()->addYears($years_completed);
-        $min_start_date = $last_anniversary->copy()->addMonth();
+        // Regla: solo en el primer año cumplido se exige aniversario + 1 mes
+        if ($years_completed === 1) {
+            $min_start_date = $last_anniversary->copy()->addMonth();
+        } else {
+            $min_start_date = null;
+        }
 
         $accrued_days = min($years_completed, 2) * 15;
-        // If the employee already has the maximum accrual (30 days),
-        // we should not enforce the anniversary + 1 month minimum start date.
-        if ($accrued_days >= 30) {
-            $min_start_date = null;
-        } else {
-            $min_start_date = $fechaIngreso->copy()->addYears($years_completed)->addMonth();
-        }
         // Days taken: approved solicitudes
         $days_taken = SolicitudVacacion::where('cedula', $empleado->cedula)
             ->where('estado', 'aprobado')
