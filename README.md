@@ -484,4 +484,4 @@ Si deseas contribuir al proyecto, por favor:
 
 ## 📄 Licencia
 
-Este proyecto es propiedad de ComfaChoco.
+Este proyecto es propiedad de Sinet
