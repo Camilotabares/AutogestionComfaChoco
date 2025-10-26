@@ -1,10 +1,10 @@
-# SINET - Sistema de Autogestión ComfaChoco
+# SINET - Sistema de Autogestión de Recursos Humanos
 
-Sistema integral de gestión de vacaciones, permisos y ausentismos para empleados de ComfaChoco, desarrollado con Laravel 12 y Jetstream.
+Sistema integral de gestión de vacaciones, permisos y ausentismos para empresas, desarrollado con Laravel 12 y Jetstream.
 
 ## 📋 Descripción
 
-SINET (anteriormente Auto Gestión ComfaChoco) es una aplicación web que permite a los empleados solicitar y gestionar sus vacaciones, permisos y licencias de manera digital. El sistema cuenta con diferentes roles (Admin, RRHH, Supervisor, Empleado) con permisos específicos para cada uno.
+SINET es una aplicación web que permite a los empleados solicitar y gestionar sus vacaciones, permisos y licencias de manera digital. El sistema cuenta con diferentes roles (Admin, RRHH, Supervisor, Empleado) con permisos específicos para cada uno.
 
 ## 🎯 Características Principales
 
@@ -77,7 +77,7 @@ APP_URL=http://localhost:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=comfachoco
+DB_DATABASE=sinet_db
 DB_USERNAME=root
 DB_PASSWORD=
 
@@ -103,7 +103,7 @@ php artisan key:generate
 Crear manualmente la base de datos en MySQL:
 
 ```sql
-CREATE DATABASE comfachoco CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE sinet_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 7. Ejecutar Migraciones y Seeders
@@ -179,19 +179,19 @@ Esto mantendrá los assets compilándose automáticamente cuando hagas cambios.
 Después de ejecutar los seeders, se crearán usuarios de prueba:
 
 **Administrador:**
-- Email: `admin@comfachoco.com`
+- Email: `admin@sinet.com`
 - Password: `password`
 
 **RRHH:**
-- Email: `rrhh@comfachoco.com`
+- Email: `rrhh@sinet.com`
 - Password: `password`
 
 **Supervisor:**
-- Email: `supervisor@comfachoco.com`
+- Email: `supervisor@sinet.com`
 - Password: `password`
 
 **Empleado:**
-- Email: `empleado@comfachoco.com`
+- Email: `empleado@sinet.com`
 - Password: `password`
 
 > ⚠️ **Importante:** Cambiar estas credenciales en producción.
@@ -388,15 +388,15 @@ git push
 
 ## 📄 Licencia
 
-Este proyecto es privado y propiedad de ComfaChoco.
+Este proyecto es de código abierto y está disponible bajo la licencia MIT.
 
 ## 👨‍💻 Desarrolladores
 
-- **Equipo de Desarrollo ComfaChoco**
+- **Equipo de Desarrollo SINET**
 
 ## 📧 Soporte
 
-Para soporte técnico, contactar a: soporte@comfachoco.com
+Para reportar issues o contribuir, visita el repositorio en GitHub.
 
 ---
 
